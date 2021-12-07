@@ -12,7 +12,7 @@ setup(
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', glob('launch/*.launch.py')),
         ('share/' + package_name + '/config', glob('config/*.*')),
-        ('share/' + package_name + '/urdf', glob('urdf/*.urdf')),
+        ('share/' + package_name + '/urdf', glob('urdf/*.*')),
         ('share/' + package_name + '/worlds', glob('worlds/*.sdf')),
         ('share/' + package_name + '/worlds', glob('worlds/*.world')),
     ],

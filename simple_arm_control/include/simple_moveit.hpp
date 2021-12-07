@@ -27,48 +27,42 @@
 //CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 //OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#pragma once
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
 
-#ifndef SIM_ACTION_SERVER_H
-#define SIM_ACTION_SERVER_H
-
-#include <memory>
 #include <string>
-#include <vector>
 
+#include "geometry_msgs/msg/pose_array.hpp"
 #include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
+#include "service_handler.hpp"
+#include "simple_interface/srv/set_object_active.hpp"
 
-#include "control_msgs/action/follow_joint_trajectory.hpp"
-
-namespace sim_action_server
+enum gripper_state
 {
+    opened = 35,
+    closed = 0
+};
 
-class ActionServer : public rclcpp::Node
+class SimpleMoveIt : public rclcpp::Node
 {
 public:
-
-    ActionServer(std::string node_name = "trajectory_control", std::string action_node_name="/follow_joint_trajectory");
-
-    bool execute_plan(trajectory_msgs::msg::JointTrajectory trajectory);
+    SimpleMoveIt(std::string node_name);
+    bool pick(std::string name, geometry_msgs::msg::Pose pose, double approach_distance = 0.1);
+    bool place(std::string name, geometry_msgs::msg::Pose pose, double approach_distance = 0.1);
+    bool goto_pose(geometry_msgs::msg::Pose pose);
+    bool goto_pose(moveit::planning_interface::MoveGroupInterface *move_group, geometry_msgs::msg::Pose pose);
+    bool change_gripper(gripper_state state);
+    moveit::planning_interface::MoveGroupInterface *get_move_group() { return &move_group; }
+    moveit::planning_interface::MoveGroupInterface *get_hand_move_group() { return &hand_move_group; }
+    moveit::planning_interface::PlanningSceneInterface *get_planning_scene_interface() { return &planning_scene_interface; }
+    bool set_obj_active(std::string name, bool set_active);
 
 private:
+    moveit::planning_interface::MoveGroupInterface move_group;
+    moveit::planning_interface::MoveGroupInterface hand_move_group;
+    moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
+    std::shared_ptr<ServiceClient<simple_interface::srv::SetObjectActive>> client;
 
-    rclcpp_action::Client<control_msgs::action::FollowJointTrajectory>::SharedPtr action_client;
-    bool common_goal_accepted = false;
-    rclcpp_action::ResultCode common_resultcode = rclcpp_action::ResultCode::UNKNOWN;
-    int common_action_result_code = control_msgs::action::FollowJointTrajectory_Result::SUCCESSFUL;
-    void common_goal_response(
-        std::shared_future<rclcpp_action::ClientGoalHandle
-        <control_msgs::action::FollowJointTrajectory>::SharedPtr> future);
-
-    void common_result_response(
-        const rclcpp_action::ClientGoalHandle
-        <control_msgs::action::FollowJointTrajectory>::WrappedResult & result);
-
-    void common_feedback(
-        rclcpp_action::ClientGoalHandle<control_msgs::action::FollowJointTrajectory>::SharedPtr,
-        const std::shared_ptr<const control_msgs::action::FollowJointTrajectory::Feedback> feedback);
+    bool wait_for_exec(moveit::planning_interface::MoveGroupInterface *move_group);
 };
-} // namespace sim_action_server
-
-#endif // SIM_ACTION_SERVER_H

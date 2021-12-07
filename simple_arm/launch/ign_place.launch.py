@@ -39,8 +39,8 @@ def generate_launch_description():
                      '-z', '0',
                      '-Y', '0',
                      #  '-topic', "robot_description"],
-                     # '-file', '/workspaces/docker/ubb/.gazebo/models/panda_ignition/model.sdf'],
-                     '-file', os.path.join(pkg_share, "config", "panda_ign.sdf",)],
+                     '-file', '/workspaces/Ignition/ubb/.gazebo/models/panda_ignition/model.sdf'],
+                    #  '-file', os.path.join(pkg_share, "urdf", "panda_ign.sdf",)],
                  output='screen')
 
     bridge = Node(package='ros_ign_bridge',
@@ -56,7 +56,7 @@ def generate_launch_description():
                   ],
                   remappings=[
                       ('/world/empty/model/panda/joint_state', 'joint_states'),
-                  ], 
+                  ],
                   )
 
     return LaunchDescription([

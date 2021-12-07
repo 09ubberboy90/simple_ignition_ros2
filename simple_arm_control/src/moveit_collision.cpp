@@ -28,78 +28,89 @@
 //OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 //OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include "moveit.hpp"
+#include "gazebo_msgs/msg/model_state.hpp"
+#include "gazebo_msgs/msg/model_states.hpp"
+#include "gazebo_msgs/srv/get_entity_state.hpp"
+#include "gazebo_msgs/srv/get_model_list.hpp"
+#include "service_handler.hpp"
+#include "shared.hpp"
 
-using namespace std::chrono_literals;
-using std::placeholders::_1;
+#include "simple_interface/srv/set_object_active.hpp"
 
-void namer(std::shared_ptr<gazebo_msgs::srv::GetEntityState_Request> request, std::string arg)
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
+
+#include <moveit_msgs/msg/collision_object.hpp>
+
+#include <chrono>
+#include <map>
+#include <string>
+#include <vector>
+
+void get_model_state_handler(std::shared_ptr<gazebo_msgs::srv::GetEntityState_Response> result, gazebo_msgs::msg::ModelStates *states)
 {
-    request->name = arg;
+    states->name.push_back(result->state.name);
+    states->pose.push_back(result->state.pose);
+    states->twist.push_back(result->state.twist);
 }
-void namer(std::shared_ptr<gazebo_msgs::srv::GetModelList_Request> request, std::string arg) {}
 
-void result_handler(std::shared_ptr<rclcpp::Node> node, std::shared_future<std::shared_ptr<gazebo_msgs::srv::GetModelList_Response>> result, geometry_msgs::msg::PoseArray *poses)
+void get_model_list_handler(std::shared_ptr<ServiceClient<gazebo_msgs::srv::GetModelList>> model_client, std::shared_ptr<ServiceClient<gazebo_msgs::srv::GetEntityState>> state_client, gazebo_msgs::msg::ModelStates *states)
 {
-    std::set<std::string> banned{"panda", "ground_plane"};
-    for (auto name : result.get()->model_names)
+    auto model_request = model_client->create_request_message();
+    auto state_request = state_client->create_request_message();
+    auto model_response = model_client->service_caller(model_request);
+    for (auto name : model_response->model_names)
     {
         if (banned.count(name) == 0)
         {
-            //RCLCPP_INFO(rclcpp::get_logger("rclcpp"), name);
-            service_caller<gazebo_msgs::srv::GetEntityState>(node, "get_entity_state", poses, name);
+            state_request->name = name;
+            auto state_response = state_client->service_caller(state_request);
+            get_model_state_handler(state_response, states);
         }
     }
 }
 
-void result_handler(std::shared_ptr<rclcpp::Node> node, std::shared_future<std::shared_ptr<gazebo_msgs::srv::GetEntityState_Response>> result, geometry_msgs::msg::PoseArray *poses)
+void set_bool(const std::shared_ptr<simple_interface::srv::SetObjectActive::Request> request,
+              std::shared_ptr<simple_interface::srv::SetObjectActive::Response> response, bool *param, std::string *obj_name)
 {
-    poses->poses.push_back(result.get()->state.pose);
+    *param = request->data;
+    *obj_name = request->name;
+    response->success = true;
+    response->message = "200";
+    RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Object %s has been set %s", obj_name->c_str(), request->data ? "active" : "inactive");
 }
-
-class GetParam : public rclcpp::Node
-{
-public:
-    GetParam() : Node("get_global_param")
-    {
-        subscription_ = this->create_subscription<std_msgs::msg::Bool>("stop_updating_obj", 10, std::bind(&GetParam::topic_callback, this, _1));
-    };
-    bool get_param()
-    {
-        return param;
-    }
-
-private:
-    bool param = false;
-    void topic_callback(const std_msgs::msg::Bool::SharedPtr msg)
-    {
-        param = msg->data;
-    }
-    rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr subscription_;
-};
 
 int main(int argc, char **argv)
 {
-
     rclcpp::init(argc, argv);
-
+    std::map<std::string, double> obj_height = {};
     rclcpp::NodeOptions node_options;
     node_options.automatically_declare_parameters_from_overrides(true);
     auto move_group_node = rclcpp::Node::make_shared("moveit_collision", node_options);
-    auto parameter_server = std::make_shared<GetParam>();
     auto service_node = rclcpp::Node::make_shared("service_handler");
+    std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("set_target_active_server");
+    bool param = true;
+    std::string obj_name = "";
+
+    std::function<void(const std::shared_ptr<simple_interface::srv::SetObjectActive::Request>,
+                       std::shared_ptr<simple_interface::srv::SetObjectActive::Response>)>
+        fcn2 = std::bind(set_bool, std::placeholders::_1, std::placeholders::_2, &param, &obj_name);
+
+    rclcpp::Service<simple_interface::srv::SetObjectActive>::SharedPtr service =
+        node->create_service<simple_interface::srv::SetObjectActive>("set_target_active", fcn2);
+
+    auto model_client = std::make_shared<ServiceClient<gazebo_msgs::srv::GetModelList>>("get_model_list");
+    auto state_client = std::make_shared<ServiceClient<gazebo_msgs::srv::GetEntityState>>("get_entity_state");
+
     // For current state monitor
     rclcpp::executors::MultiThreadedExecutor executor;
     executor.add_node(move_group_node);
-    executor.add_node(parameter_server);
-    std::thread([&executor]() { executor.spin(); }).detach();
-    moveit::planning_interface::PlanningSceneInterface planning_scene_interface("");
-    bool gazebo;
-    if (!move_group_node->get_parameter("gazebo", gazebo))
-    {
-        // In case the parameter was not created use default
-        gazebo = false;
-    }
+    executor.add_node(node);
+    std::thread([&executor]()
+                { executor.spin(); })
+        .detach();
+
+    moveit::planning_interface::PlanningSceneInterface planning_scene_interface;
 
     bool thrower;
     if (!move_group_node->get_parameter("thrower", thrower))
@@ -107,73 +118,60 @@ int main(int argc, char **argv)
         // In case the parameter was not created use default
         thrower = false;
     }
-    bool use_spawn_obj;
-    if (!move_group_node->get_parameter("use_spawn_obj", use_spawn_obj))
-    {
-        // In case the parameter was not created use default
-        use_spawn_obj = false;
-    }
 
-    if (use_spawn_obj)
+    while (true)
     {
-
-        while (true)
+        gazebo_msgs::msg::ModelStates states;
+        std::vector<moveit_msgs::msg::CollisionObject> collision_objects;
+        get_model_list_handler(model_client, state_client, &states);
+        for (int i = 0; i < (int)states.name.size(); i++)
         {
-
-            geometry_msgs::msg::PoseArray poses;
-            std::vector<moveit_msgs::msg::CollisionObject> collision_object;
-            service_caller<gazebo_msgs::srv::GetModelList>(service_node, "get_model_list", &poses);
-            for (int i = 0; i < poses.poses.size(); i++)
+            moveit_msgs::msg::CollisionObject obj;
+            auto pose = states.pose[i];
+            obj.header.frame_id = "world";
+            obj.id = states.name[i];
+            shape_msgs::msg::SolidPrimitive primitive;
+            double height = 0.0;
+            if (obj_height.count(obj.id) > 0)
             {
-                moveit_msgs::msg::CollisionObject obj;
-                auto pose = poses.poses[i];
-                obj.header.frame_id = "world";
-                obj.id = "Box" + i;
-                shape_msgs::msg::SolidPrimitive primitive;
+                obj.operation = obj.MOVE;
+                height = obj_height[obj.id];
+            }
+            else // New object
+            {
+                obj.operation = obj.ADD;
                 primitive.type = primitive.BOX;
                 primitive.dimensions.resize(3);
-                obj.operation = obj.ADD;
-                if (i == 0 && !thrower) // table
+                if (obj.id == "table" && !thrower) // table
                 {
                     primitive.dimensions[0] = 0.92;
-                    if (gazebo)
-                    {
-                        primitive.dimensions[2] = 0.58;
-                        primitive.dimensions[1] = 0.92;
-                    }
-                    else
-                    {
-                        primitive.dimensions[1] = 0.5;
-                        primitive.dimensions[2] = 0.914;
-                    }
-                    pose.position.z += primitive.dimensions[1] / 2;
-                    
-                    
+                    primitive.dimensions[1] = 0.5;
+                    primitive.dimensions[2] = 0.914;
+                    height = primitive.dimensions[1]; // reason is that rviz uses center of mass while webots table uses bottom position
                 }
                 else // cube
                 {
-                    printf("%i\n", i);
                     primitive.dimensions[0] = 0.05;
                     primitive.dimensions[1] = 0.05;
                     primitive.dimensions[2] = 0.05;
-                    // pose.position.z += primitive.dimensions[1] / 2;
+                    height = 0;
                 }
-                if (i == 1)
-                {
-                    obj.id = "target";
-                    if (parameter_server->get_param())
-                    {
-                        continue;
-                    }
-                }
-
                 obj.primitives.push_back(primitive);
-                obj.primitive_poses.push_back(pose);
-                collision_object.push_back(obj);
+                obj_height[obj.id] = height;
             }
-            planning_scene_interface.applyCollisionObjects(collision_object);
-            //RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Add an object into the world");
+            pose.position.z += height / 2;
+
+            if (!param && obj.id == obj_name)
+            {
+                obj_height.erase(obj_name);
+                continue;
+            }
+
+            obj.primitive_poses.push_back(pose);
+            collision_objects.push_back(obj);
         }
+        planning_scene_interface.applyCollisionObjects(collision_objects);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // otherwise too many calls 
     }
 
     rclcpp::shutdown();

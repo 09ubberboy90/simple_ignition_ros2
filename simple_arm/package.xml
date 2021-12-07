@@ -14,7 +14,8 @@
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>rclpy</exec_depend>
   <exec_depend>ros2_control</exec_depend>
-  <exec_depend>gazebo_ros2_control</exec_depend>
+  <exec_depend>ros_ign</exec_depend>
+  <exec_depend>ros_ign_gazebo</exec_depend>
   
   <export>
     <build_type>ament_python</build_type>

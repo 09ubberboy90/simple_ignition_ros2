@@ -61,22 +61,21 @@
         <xacro:arm_control transmission="${arm_id}_rightfinger" joint="${arm_id}_finger_joint2" motor="${arm_id}_finger_joint2"/>
     </xacro:macro>
 
-  <link name="world"/>
-  <joint name="panda_to_world" type="fixed">
-    <parent link="world"/>
-    <child link="panda_link0"/>
-    <origin rpy="0 0 0" xyz="0 0 0"/>
-    <dynamics damping="1.0"/>
-  </joint>
-<xacro:panda_gazebo arm_id="panda"/>
+    <link name="world"/>
+    <joint name="panda_to_world" type="fixed">
+        <parent link="world"/>
+        <child link="panda_link0"/>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <dynamics damping="1.0"/>
+    </joint>
+    <xacro:panda_gazebo arm_id="panda"/>
   <!-- <xacro:panda_control arm_id="panda"/> -->
-  <gazebo>
-    <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-      <robot_param>robot_description</robot_param>
-      <robot_param_node>robot_state_publisher</robot_param_node>
-      <parameters>$(find simple_arm)/config/panda_ros_controllers.yaml</parameters>
-    </plugin>
-
-  </gazebo>
+    <gazebo>
+        <plugin filename="libignition_ros2_control.so" name="ignition_ros2_control">
+        <robot_param>robot_description</robot_param>
+        <robot_param_node>robot_state_publisher</robot_param_node>
+        <parameters>$(find ignition_ros2_control_demos)/config/cartpole_controller.yaml</parameters>
+        </plugin>
+    </gazebo>
 
 </robot>
