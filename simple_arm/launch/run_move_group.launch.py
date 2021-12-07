@@ -36,7 +36,7 @@ def generate_launch_description():
         os.path.join(
             get_package_share_directory("simple_arm"),
             "urdf",
-            "panda_webots.urdf.xacro",
+            "panda.urdf.xacro",
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}

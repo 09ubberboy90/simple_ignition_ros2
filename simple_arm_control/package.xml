@@ -25,7 +25,7 @@
   <exec_depend>hardware_interface</exec_depend>
   <exec_depend>joint_state_controller</exec_depend>
   <exec_depend>rclcpp</exec_depend>
-  <exec_depend>webots_custom_interface</exec_depend>
+  <exec_depend>simple_interface</exec_depend>
   <exec_depend>gazebo_msgs</exec_depend>
   <depend>backward_ros</depend>
   

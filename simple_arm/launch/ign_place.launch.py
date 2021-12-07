@@ -9,7 +9,7 @@ from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 import xacro
-
+from launch.actions import ExecuteProcess
 
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -27,7 +27,7 @@ def generate_launch_description():
     pkg_ros_ign_gazebo = get_package_share_directory('ros_ign_gazebo')
     pkg_share = get_package_share_directory(pkg_name)
 
-    gazebo = IncludeLaunchDescription(
+    ignition = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_ign_gazebo, 'launch', 'ign_gazebo.launch.py'),
         ),)
@@ -38,34 +38,61 @@ def generate_launch_description():
                      '-x', '0',
                      '-z', '0',
                      '-Y', '0',
-                     #  '-topic', "robot_description"],
-                     '-file', '/workspaces/Ignition/ubb/.gazebo/models/panda_ignition/model.sdf'],
+                      '-topic', "robot_description"],
+                    #  '-file', '/workspaces/Ignition/ubb/.gazebo/models/panda_ignition/model.sdf'],
                     #  '-file', os.path.join(pkg_share, "urdf", "panda_ign.sdf",)],
                  output='screen')
 
-    bridge = Node(package='ros_ign_bridge',
-                  executable='parameter_bridge',
-                  name='parameter_bridge_throwing_object_pose',
-                  output='screen',
-                  arguments=[
-                      '/model/throwing_object/pose@geometry_msgs/msg/Pose[ignition.msgs.Pose',
-                      '/world/empty/model/panda/joint_state@sensor_msgs/msg/JointState[ignition.msgs.Model',
-                      '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
-                      '/joint_trajectory@trajectory_msgs/msg/JointTrajectory]ignition.msgs.JointTrajectory',
-                      '/joint_trajectory_progress@std_msgs/msg/Float32[ignition.msgs.Float'
-                  ],
-                  remappings=[
-                      ('/world/empty/model/panda/joint_state', 'joint_states'),
-                  ],
-                  )
+    robot_description_config = xacro.process_file(
+        os.path.join(
+            pkg_share,
+            "urdf",
+            "panda.urdf.xacro",
+        )
+    )
+    robot_description = {"robot_description": robot_description_config.toxml()}
+    ros2_control_params = os.path.join(pkg_share, 'config', 'panda_ros_controllers.yaml')
+    robot_state_publisher = Node(
+        package="robot_state_publisher",
+        executable="robot_state_publisher",
+        name="robot_state_publisher",
+        output="both",
+        parameters=[robot_description],
+    )    
 
+    ros2_control_node = Node(
+        package="controller_manager",
+        executable="ros2_control_node",
+        parameters=[robot_description, ros2_control_params],
+        output={
+            "stdout": "screen",
+            "stderr": "screen",
+        },
+    )
+
+
+    load_controllers = []
+    for controller in [
+        "panda_arm_controller",
+        "panda_hand_controller",
+        "joint_state_broadcaster",
+    ]:
+        load_controllers += [
+            ExecuteProcess(
+                cmd=["ros2 control load_controller --set-state start {}".format(controller)],
+                shell=True,
+                output="screen",
+            )
+        ]
     return LaunchDescription([
         DeclareLaunchArgument(
             'ign_args',
-            default_value=[os.path.join(
-                pkg_share, 'worlds', 'panda_place.sdf'), " -r"],
+            default_value=[" -r"],
             description='Ignition Gazebo arguments'),
-        gazebo,
+        ignition,
         spawn,
-        bridge
-    ])
+        robot_state_publisher,
+        # ros2_control_node,
+    ]
+    #  + load_controllers
+    )
