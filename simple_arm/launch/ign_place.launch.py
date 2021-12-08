@@ -38,9 +38,9 @@ def generate_launch_description():
                      '-x', '0',
                      '-z', '0',
                      '-Y', '0',
-                      '-topic', "robot_description"],
+                    #   '-topic', "robot_description"],
                     #  '-file', '/workspaces/Ignition/ubb/.gazebo/models/panda_ignition/model.sdf'],
-                    #  '-file', os.path.join(pkg_share, "urdf", "panda_ign.sdf",)],
+                     '-file', os.path.join(pkg_share, "urdf", "panda_ign.sdf",)], # using well defined sdf as converting urdf causes problems with the physics engine
                  output='screen')
 
     robot_description_config = xacro.process_file(
@@ -51,7 +51,6 @@ def generate_launch_description():
         )
     )
     robot_description = {"robot_description": robot_description_config.toxml()}
-    ros2_control_params = os.path.join(pkg_share, 'config', 'panda_ros_controllers.yaml')
     robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
@@ -59,16 +58,6 @@ def generate_launch_description():
         output="both",
         parameters=[robot_description],
     )    
-
-    ros2_control_node = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[robot_description, ros2_control_params],
-        output={
-            "stdout": "screen",
-            "stderr": "screen",
-        },
-    )
 
 
     load_controllers = []
@@ -87,12 +76,11 @@ def generate_launch_description():
     return LaunchDescription([
         DeclareLaunchArgument(
             'ign_args',
-            default_value=[" -r"],
+            default_value=[os.path.join(
+                pkg_share, 'worlds', 'empty.sdf'), " -v"],
             description='Ignition Gazebo arguments'),
         ignition,
         spawn,
         robot_state_publisher,
-        # ros2_control_node,
-    ]
-    #  + load_controllers
+    ] + load_controllers
     )

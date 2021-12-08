@@ -1,116 +1,14 @@
-<?xml version="1.0"?>
-<sdf version="1.7">
+<sdf version='1.7'>
     <include>
-        <uri>https://fuel.ignitionrobotics.org/1.0/AndrejOrsula/models/panda</uri>
-        <pose>0 0 0 0 0 0</pose>
-
-        <!-- Joint state publisher -->
-        <plugin filename="libignition-gazebo-joint-state-publisher-system.so" name="ignition::gazebo::systems::JointStatePublisher">
-            <joint_name>panda_joint1</joint_name>
-            <joint_name>panda_joint2</joint_name>
-            <joint_name>panda_joint3</joint_name>
-            <joint_name>panda_joint4</joint_name>
-            <joint_name>panda_joint5</joint_name>
-            <joint_name>panda_joint6</joint_name>
-            <joint_name>panda_joint7</joint_name>
-            <joint_name>panda_finger_joint1</joint_name>
-            <joint_name>panda_finger_joint2</joint_name>
-        </plugin>
-
-        <!-- Joint trajectory controller -->
-        <plugin filename="libignition-gazebo-joint-trajectory-controller-system.so" name="ignition::gazebo::systems::JointTrajectoryController">
-            <topic>joint_trajectory</topic>
-
-            <joint_name>panda_joint1</joint_name>
-            <initial_position>0</initial_position>
-            <position_p_gain>3000</position_p_gain>
-            <position_d_gain>15</position_d_gain>
-            <position_i_gain>1650</position_i_gain>
-            <position_i_min>-15</position_i_min>
-            <position_i_max>15</position_i_max>
-            <position_cmd_min>-87</position_cmd_min>
-            <position_cmd_max>87</position_cmd_max>
-
-            <joint_name>panda_joint2</joint_name>
-            <initial_position>0</initial_position>
-            <position_p_gain>9500</position_p_gain>
-            <position_d_gain>47.5</position_d_gain>
-            <position_i_gain>5225</position_i_gain>
-            <position_i_min>-47.5</position_i_min>
-            <position_i_max>47.5</position_i_max>
-            <position_cmd_min>-87</position_cmd_min>
-            <position_cmd_max>87</position_cmd_max>
-
-            <joint_name>panda_joint3</joint_name>
-            <initial_position>0</initial_position>
-            <position_p_gain>6500</position_p_gain>
-            <position_d_gain>32.5</position_d_gain>
-            <position_i_gain>3575</position_i_gain>
-            <position_i_min>-32.5</position_i_min>
-            <position_i_max>32.5</position_i_max>
-            <position_cmd_min>-87</position_cmd_min>
-            <position_cmd_max>87</position_cmd_max>
-
-            <joint_name>panda_joint4</joint_name>
-            <initial_position>-1.57</initial_position>
-            <position_p_gain>6000</position_p_gain>
-            <position_d_gain>30</position_d_gain>
-            <position_i_gain>3300</position_i_gain>
-            <position_i_min>-30</position_i_min>
-            <position_i_max>30</position_i_max>
-            <position_cmd_min>-87</position_cmd_min>
-            <position_cmd_max>87</position_cmd_max>
-
-            <joint_name>panda_joint5</joint_name>
-            <initial_position>0</initial_position>
-            <position_p_gain>2750</position_p_gain>
-            <position_d_gain>2.75</position_d_gain>
-            <position_i_gain>1515</position_i_gain>
-            <position_i_min>-6.88</position_i_min>
-            <position_i_max>6.88</position_i_max>
-            <position_cmd_min>-12</position_cmd_min>
-            <position_cmd_max>12</position_cmd_max>
-
-            <joint_name>panda_joint6</joint_name>
-            <initial_position>1.57</initial_position>
-            <position_p_gain>2500</position_p_gain>
-            <position_d_gain>2.5</position_d_gain>
-            <position_i_gain>1375</position_i_gain>
-            <position_i_min>-6.25</position_i_min>
-            <position_i_max>6.25</position_i_max>
-            <position_cmd_min>-12</position_cmd_min>
-            <position_cmd_max>12</position_cmd_max>
-
-            <joint_name>panda_joint7</joint_name>
-            <initial_position>0.79</initial_position>
-            <position_p_gain>2000</position_p_gain>
-            <position_d_gain>2</position_d_gain>
-            <position_i_gain>1100</position_i_gain>
-            <position_i_min>-5</position_i_min>
-            <position_i_max>5</position_i_max>
-            <position_cmd_min>-12</position_cmd_min>
-            <position_cmd_max>12</position_cmd_max>
-
-            <joint_name>panda_finger_joint1</joint_name>
-            <initial_position>0</initial_position>
-            <position_p_gain>250</position_p_gain>
-            <position_d_gain>0.2</position_d_gain>
-            <position_i_gain>50</position_i_gain>
-            <position_i_min>-10</position_i_min>
-            <position_i_max>10</position_i_max>
-            <position_cmd_min>-20</position_cmd_min>
-            <position_cmd_max>20</position_cmd_max>
-
-            <joint_name>panda_finger_joint2</joint_name>
-            <initial_position>0</initial_position>
-            <position_p_gain>250</position_p_gain>
-            <position_d_gain>0.2</position_d_gain>
-            <position_i_gain>50</position_i_gain>
-            <position_i_min>-10</position_i_min>
-            <position_i_max>10</position_i_max>
-            <position_cmd_min>-20</position_cmd_min>
-            <position_cmd_max>20</position_cmd_max>
-        </plugin>
+      <uri>
+      https://fuel.ignitionrobotics.org/1.0/AndrejOrsula/models/panda
+      </uri>
+      <plugin name='ignition_ros2_control::IgnitionROS2ControlPlugin' filename='ignition_ros2_control-system'>
+        <robot_param>robot_description</robot_param>
+        <robot_param_node>robot_state_publisher</robot_param_node>
+        <parameters>/workspaces/Ignition/ubb/ignitiondev/install/share/simple_arm/config/panda_ros_controllers.yaml</parameters>
+        <!-- Need to find a way to set this programatically -->
+      </plugin>
     </include>
-
+    
 </sdf>

@@ -195,5 +195,6 @@ def generate_launch_description():
             static_tf,
             run_move_group_node,
             mongodb_server_node,
-        ] + load_controllers
+        ] 
+        # + load_controllers
     )

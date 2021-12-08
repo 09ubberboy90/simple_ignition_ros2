@@ -1,46 +1,75 @@
-<?xml version="1.0"?>
-<sdf version='1.7'>
-    <world name='empty'>
-        <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics">
-            <engine>
-                <filename>ignition-physics-dartsim-plugin</filename>
-            </engine>
+<?xml version="1.0" ?>
+<sdf version="1.7">
+    <world name="world_demo">
+        <physics name="1ms" type="ignored">
+            <max_step_size>0.001</max_step_size>
+            <real_time_factor>1.0</real_time_factor>
+        </physics>
+        <plugin filename="libignition-gazebo-physics-system.so" name="ignition::gazebo::systems::Physics">
         </plugin>
-        <plugin name='ignition::gazebo::systems::SceneBroadcaster' filename='ignition-gazebo-scene-broadcaster-system' />
-        <plugin name='ignition::gazebo::systems::UserCommands' filename='ignition-gazebo-user-commands-system' />
-        <plugin name='ignition::gazebo::systems::Contact' filename='ignition-gazebo-contact-system' />
-        <gui fullscreen='0'>
-            <plugin name='3D View' filename='GzScene3D'>
+        <plugin filename="libignition-gazebo-user-commands-system.so" name="ignition::gazebo::systems::UserCommands">
+        </plugin>
+        <plugin filename="libignition-gazebo-scene-broadcaster-system.so" name="ignition::gazebo::systems::SceneBroadcaster">
+        </plugin>
+        <gui fullscreen="0">
+            <!-- 3D scene -->
+            <plugin filename="GzScene3D" name="3D View">
                 <ignition-gui>
                     <title>3D View</title>
-                    <property type='bool' key='showTitleBar'>0</property>
-                    <property type='bool' key='resizable'>0</property>
-                    <property type='double' key='z'>0</property>
-                    <anchor line='right' target='window' target_line='right' />
-                    <anchor line='left' target='window' target_line='left' />
-                    <anchor line='top' target='window' target_line='top' />
-                    <anchor line='bottom' target='window' target_line='bottom' />
+                    <property type="bool" key="showTitleBar">false</property>
+                    <property type="string" key="state">docked</property>
                 </ignition-gui>
-                <engine>ogre2</engine>
+
+                <engine>ogre</engine>
                 <scene>scene</scene>
                 <ambient_light>0.4 0.4 0.4</ambient_light>
-                <background_color>0.8 0.8 0.8 1.0</background_color>
-                <camera_pose>0.5 -1.1 1.8 0 0.78539816 1.5707963</camera_pose>
+                <background_color>0.8 0.8 0.8</background_color>
             </plugin>
-            <plugin name='World control' filename='WorldControl'>
+            <plugin filename="WorldControl" name="World control">
                 <ignition-gui>
                     <title>World control</title>
-                    <property type='bool' key='showTitleBar'>0</property>
-                    <property type='bool' key='resizable'>0</property>
-                    <property type='double' key='height'>72</property>
-                    <property type='double' key='width'>121</property>
-                    <property type='double' key='z'>1</property>
-                    <anchor line='left' target='window' target_line='left' />
-                    <anchor line='bottom' target='window' target_line='bottom' />
+                    <property type="bool" key="showTitleBar">false</property>
+                    <property type="bool" key="resizable">false</property>
+                    <property type="double" key="height">72</property>
+                    <property type="double" key="width">121</property>
+                    <property type="double" key="z">1</property>
+
+                    <property type="string" key="state">floating</property>
+                    <anchors target="3D View">
+                        <line own="left" target="left"/>
+                        <line own="bottom" target="bottom"/>
+                    </anchors>
                 </ignition-gui>
-                <play_pause>1</play_pause>
-                <step>1</step>
-                <start_paused>0</start_paused>
+
+                <play_pause>true</play_pause>
+                <step>true</step>
+                <start_paused>true</start_paused>
+                <service>/world/world_demo/control</service>
+                <stats_topic>/world/world_demo/stats</stats_topic>
+            </plugin>
+            <plugin filename="WorldStats" name="World stats">
+                <ignition-gui>
+                    <title>World stats</title>
+                    <property type="bool" key="showTitleBar">false</property>
+                    <property type="bool" key="resizable">false</property>
+                    <property type="double" key="height">110</property>
+                    <property type="double" key="width">290</property>
+                    <property type="double" key="z">1</property>
+
+                    <property type="string" key="state">floating</property>
+                    <anchors target="3D View">
+                        <line own="right" target="right"/>
+                        <line own="bottom" target="bottom"/>
+                    </anchors>
+                </ignition-gui>
+
+                <sim_time>true</sim_time>
+                <real_time>true</real_time>
+                <real_time_factor>true</real_time_factor>
+                <iterations>true</iterations>
+                <topic>/world/world_demo/stats</topic>
+            </plugin>
+            <plugin filename="EntityTree" name="Entity tree">
             </plugin>
         </gui>
         <light type="directional" name="sun">
@@ -56,33 +85,21 @@
             </attenuation>
             <direction>-0.5 0.1 -0.9</direction>
         </light>
-
-        <scene>
-            <ambient>0.4 0.4 0.4 1</ambient>
-            <grid>false</grid>
-        </scene>
-        <physics name="default_physics" type="dart">
-            <max_step_size>0.0025</max_step_size>
-            <real_time_factor>1.0</real_time_factor>
-        </physics>
-
         <model name="ground_plane">
-            <pose>0.5 0 0 0 0 0</pose>
             <static>true</static>
-            <link name="ground_plane_link">
-                <collision name="ground_plane_collision">
-                    <pose>0 0 -0.05 0 0 0</pose>
-                    <geometry>
-                        <box>
-                            <size>5 2 0.1</size>
-                        </box>
-                    </geometry>
-                </collision>
-                <visual name="ground_plane_visual">
+            <link name="link">
+                <collision name="collision">
                     <geometry>
                         <plane>
                             <normal>0 0 1</normal>
-                            <size>5 2</size>
+                        </plane>
+                    </geometry>
+                </collision>
+                <visual name="visual">
+                    <geometry>
+                        <plane>
+                            <normal>0 0 1</normal>
+                            <size>100 100</size>
                         </plane>
                     </geometry>
                     <material>
@@ -93,7 +110,5 @@
                 </visual>
             </link>
         </model>
-
-
     </world>
 </sdf>
