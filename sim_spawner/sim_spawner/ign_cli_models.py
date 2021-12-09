@@ -40,7 +40,7 @@ class SpawnerNode(Node):
         self.entity_pattern = re.compile(r"      \[(.*?)\]")
 
         table_path = "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Cafe table"
-        cube_path = "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Wood cube 5cm"
+        cube_path = "https://fuel.ignitionrobotics.org/1.0/09ubberboy90/models/Box 5cm"
 
         self.entity = self.create_service(
             GetEntityState, 'get_entity_state', self.get_entity_state)
