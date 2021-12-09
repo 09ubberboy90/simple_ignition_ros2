@@ -38,9 +38,9 @@ def generate_launch_description():
     kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
 
     
-    gazebo_spawner = Node(name='gazebo_spawner',
+    gazebo_spawner = Node(name='ign_cli_models',
                             package='sim_spawner',
-                            executable='gazebo_spawner',
+                            executable='ign_cli_models',
                             output='screen')
 
     moveit_collision = Node(name='moveit_collision',
