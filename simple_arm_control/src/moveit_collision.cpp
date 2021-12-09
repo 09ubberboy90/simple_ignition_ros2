@@ -160,7 +160,7 @@ int main(int argc, char **argv)
                     primitive.dimensions[0] = 0.05;
                     primitive.dimensions[1] = 0.05;
                     primitive.dimensions[2] = 0.05;
-                    height = primitive.dimensions[1];
+                    height = 0;
                 }
                 obj.primitives.push_back(primitive);
                 obj_height[obj.id] = height;

@@ -52,7 +52,7 @@ class SpawnerNode(Node):
         #     for j in range(-5,6):
         #         print(f"Spawned at {i*0.5} {j*0.5}")
         #         self.spawn_obj("worlds/Cube.wbo", position = [i, 0, j])
-        for x in range(3, 6):
+        for x in range(2, 5):
             for y in range(-3, 4):
                 self.spawn_obj(cube_path, "cube", [x/10, y/10, 0.4])
 
