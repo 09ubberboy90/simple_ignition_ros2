@@ -63,7 +63,7 @@ class SpawnerNode(Node):
         for i, j in zip(position, offset):
             out.append(i+j)
 
-        spawn_cmd = f"""ign service -s /world/world_demo/create \
+        spawn_cmd = f"""ign service -s /world/panda_place/create \
 --reqtype ignition.msgs.EntityFactory \
 --reptype ignition.msgs.Boolean \
 --timeout 300 \
@@ -88,6 +88,7 @@ class SpawnerNode(Node):
             return response
 
         model_list = [s.strip() for s in out]
+        self.get_logger().info(f"Got {len(model_list)} models")
         response.model_names = model_list
         response.success = True
         return response

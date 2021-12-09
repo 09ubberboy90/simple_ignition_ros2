@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.7">
-    <world name="world_demo">
+    <world name="panda_place">
         <physics name="1ms" type="ignored">
             <max_step_size>0.001</max_step_size>
             <real_time_factor>1.0</real_time_factor>
@@ -43,9 +43,9 @@
 
                 <play_pause>true</play_pause>
                 <step>true</step>
-                <start_paused>false</start_paused>
-                <service>/world/world_demo/control</service>
-                <stats_topic>/world/world_demo/stats</stats_topic>
+                <start_paused>0</start_paused>
+                <service>/world/panda_place/control</service>
+                <stats_topic>/world/panda_place/stats</stats_topic>
             </plugin>
             <plugin filename="WorldStats" name="World stats">
                 <ignition-gui>
@@ -66,8 +66,8 @@
                 <sim_time>true</sim_time>
                 <real_time>true</real_time>
                 <real_time_factor>true</real_time_factor>
-                <iterations>true</iterations>
-                <topic>/world/world_demo/stats</topic>
+                <iterations>false</iterations>
+                <topic>/world/panda_place/stats</topic>
             </plugin>
             <plugin filename="EntityTree" name="Entity tree">
             </plugin>

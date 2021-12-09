@@ -59,13 +59,19 @@ void get_model_list_handler(std::shared_ptr<ServiceClient<gazebo_msgs::srv::GetM
     auto model_request = model_client->create_request_message();
     auto state_request = state_client->create_request_message();
     auto model_response = model_client->service_caller(model_request);
-    for (auto name : model_response->model_names)
+    if (model_response->success)
     {
-        if (banned.count(name) == 0)
+        for (auto name : model_response->model_names)
         {
-            state_request->name = name;
-            auto state_response = state_client->service_caller(state_request);
-            get_model_state_handler(state_response, states);
+            if (banned.count(name) == 0)
+            {
+                state_request->name = name;
+                auto state_response = state_client->service_caller(state_request);
+                if (state_response->success)
+                {
+                    get_model_state_handler(state_response, states);
+                }
+            }
         }
     }
 }
@@ -144,17 +150,17 @@ int main(int argc, char **argv)
                 primitive.dimensions.resize(3);
                 if (obj.id == "table" && !thrower) // table
                 {
-                    primitive.dimensions[0] = 0.92;
-                    primitive.dimensions[1] = 0.5;
-                    primitive.dimensions[2] = 0.914;
-                    height = primitive.dimensions[1]; // reason is that rviz uses center of mass while webots table uses bottom position
+                    primitive.dimensions[0] = 0.913;
+                    primitive.dimensions[1] = 0.913;
+                    primitive.dimensions[2] = 0.74;
+                    height = primitive.dimensions[2]; // reason is that rviz uses center of mass while webots table uses bottom position
                 }
                 else // cube
                 {
                     primitive.dimensions[0] = 0.05;
                     primitive.dimensions[1] = 0.05;
                     primitive.dimensions[2] = 0.05;
-                    height = 0;
+                    height = primitive.dimensions[1];
                 }
                 obj.primitives.push_back(primitive);
                 obj_height[obj.id] = height;
@@ -171,7 +177,7 @@ int main(int argc, char **argv)
             collision_objects.push_back(obj);
         }
         planning_scene_interface.applyCollisionObjects(collision_objects);
-        std::this_thread::sleep_for(std::chrono::milliseconds(500)); // otherwise too many calls 
+        std::this_thread::sleep_for(std::chrono::milliseconds(250)); // otherwise too many calls 
     }
 
     rclcpp::shutdown();

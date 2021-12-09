@@ -10,5 +10,4 @@
         <!-- Need to find a way to set this programatically -->
       </plugin>
     </include>
-    
 </sdf>
