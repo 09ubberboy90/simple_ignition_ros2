@@ -1,11 +1,14 @@
 <?xml version="1.0" ?>
 <sdf version="1.7">
     <world name="panda_place">
-        <physics name="1ms" type="ignored">
-            <max_step_size>0.001</max_step_size>
+        <physics name="default_physics" type="dart">
+            <max_step_size>0.0025</max_step_size>
             <real_time_factor>1.0</real_time_factor>
         </physics>
-        <plugin filename="libignition-gazebo-physics-system.so" name="ignition::gazebo::systems::Physics">
+        <plugin filename="ignition-gazebo-physics-system" name="ignition::gazebo::systems::Physics">
+            <engine>
+                <filename>ignition-physics-dartsim-plugin</filename>
+            </engine>
         </plugin>
         <plugin filename="libignition-gazebo-user-commands-system.so" name="ignition::gazebo::systems::UserCommands">
         </plugin>
@@ -20,32 +23,25 @@
                     <property type="string" key="state">docked</property>
                 </ignition-gui>
 
-                <engine>ogre</engine>
+                <engine>ogre2</engine>
                 <scene>scene</scene>
                 <ambient_light>0.4 0.4 0.4</ambient_light>
                 <background_color>0.8 0.8 0.8</background_color>
             </plugin>
-            <plugin filename="WorldControl" name="World control">
+            <plugin name='World control' filename='WorldControl'>
                 <ignition-gui>
                     <title>World control</title>
-                    <property type="bool" key="showTitleBar">false</property>
-                    <property type="bool" key="resizable">false</property>
-                    <property type="double" key="height">72</property>
-                    <property type="double" key="width">121</property>
-                    <property type="double" key="z">1</property>
-
-                    <property type="string" key="state">floating</property>
-                    <anchors target="3D View">
-                        <line own="left" target="left"/>
-                        <line own="bottom" target="bottom"/>
-                    </anchors>
+                    <property type='bool' key='showTitleBar'>0</property>
+                    <property type='bool' key='resizable'>0</property>
+                    <property type='double' key='height'>72</property>
+                    <property type='double' key='width'>121</property>
+                    <property type='double' key='z'>1</property>
+                    <anchor line='left' target='window' target_line='left' />
+                    <anchor line='bottom' target='window' target_line='bottom' />
                 </ignition-gui>
-
-                <play_pause>true</play_pause>
-                <step>true</step>
+                <play_pause>1</play_pause>
+                <step>1</step>
                 <start_paused>0</start_paused>
-                <service>/world/panda_place/control</service>
-                <stats_topic>/world/panda_place/stats</stats_topic>
             </plugin>
             <plugin filename="WorldStats" name="World stats">
                 <ignition-gui>
@@ -86,20 +82,22 @@
             <direction>-0.5 0.1 -0.9</direction>
         </light>
         <model name="ground_plane">
+            <pose>0.5 0 0 0 0 0</pose>
             <static>true</static>
-            <link name="link">
-                <collision name="collision">
+            <link name="ground_plane_link">
+                <collision name="ground_plane_collision">
+                    <pose>0 0 -0.05 0 0 0</pose>
                     <geometry>
-                        <plane>
-                            <normal>0 0 1</normal>
-                        </plane>
+                        <box>
+                            <size>5 2 0.1</size>
+                        </box>
                     </geometry>
                 </collision>
-                <visual name="visual">
+                <visual name="ground_plane_visual">
                     <geometry>
                         <plane>
                             <normal>0 0 1</normal>
-                            <size>100 100</size>
+                            <size>5 2</size>
                         </plane>
                     </geometry>
                     <material>

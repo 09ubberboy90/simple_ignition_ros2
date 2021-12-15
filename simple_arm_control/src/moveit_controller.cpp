@@ -56,6 +56,10 @@ std::pair<const std::string, moveit_msgs::msg::CollisionObject> choose_target(mo
 
     int rand_index = rand() % (int) collision_objects.size();
     auto chosen = *std::next(std::begin(collision_objects),rand_index-1);
+    if (chosen.first.empty())
+    {
+        return choose_target(ps, processed);
+    }
     
     processed->emplace(chosen.first);
     RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Chosen target is %s", chosen.first.c_str());
