@@ -30,8 +30,10 @@ panda_hand_controller:
   ros__parameters:
     command_interfaces:
       - position
+      - velocity
     state_interfaces:
       - position
+      - velocity
 
     joints: 
       - panda_finger_joint1
