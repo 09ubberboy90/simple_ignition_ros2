@@ -8,15 +8,13 @@
             </hardware>
             <joint name="panda_finger_joint1">
                 <param name="initial_position">0.0</param>
-                <command_interface name="position" />
-                <command_interface name="velocity" />
+                <command_interface name="effort" />
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
 
             </joint>
             <joint name="panda_finger_joint2">
-                <command_interface name="position" />
-                <command_interface name="velocity" />
+                <command_interface name="effort" />
                 <state_interface name="position"/>
                 <state_interface name="velocity"/>
             </joint>

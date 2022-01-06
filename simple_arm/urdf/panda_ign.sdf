@@ -6,7 +6,7 @@
       <plugin name='ignition_ros2_control::IgnitionROS2ControlPlugin' filename='ignition_ros2_control-system'>
         <robot_param>robot_description</robot_param>
         <robot_param_node>robot_state_publisher</robot_param_node>
-        <parameters>/home/ubb/Documents/docker_sim_comp/Ignition/ubb/ignitiondev/src/simple_arm/config/panda_ros_controllers.yaml</parameters>
+        <parameters>/workspaces/Ignition/ubb/ignitiondev/install/share/simple_arm/config/panda_ros_controllers.yaml</parameters>
         <!-- Need to find a way to set this programatically -->
       </plugin>
     </include>
