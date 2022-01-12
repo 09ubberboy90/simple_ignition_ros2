@@ -3,10 +3,10 @@
       <uri>
       https://fuel.ignitionrobotics.org/1.0/AndrejOrsula/models/panda
       </uri>
-      <plugin name='ignition_ros2_control::IgnitionROS2ControlPlugin' filename='ignition_ros2_control-system'>
+      <plugin name='ign_ros2_control::IgnitionROS2ControlPlugin' filename='ign_ros2_control-system'>
         <robot_param>robot_description</robot_param>
         <robot_param_node>robot_state_publisher</robot_param_node>
-        <parameters>/workspaces/Ignition/ubb/ignitiondev/install/share/simple_arm/config/panda_ros_controllers.yaml</parameters>
+        <parameters>/workspaces/Ignition_copy/ubb/ignitiondev/src/simple_arm/config/panda_ros_controllers.yaml</parameters>
         <!-- Need to find a way to set this programatically -->
       </plugin>
     </include>
