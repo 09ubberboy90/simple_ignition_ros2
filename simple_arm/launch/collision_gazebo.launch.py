@@ -29,14 +29,24 @@ def load_yaml(package_name, file_path):
 
 def generate_launch_description():
     # planning_context
-    robot_description_config = load_file('moveit_resources_panda_description', 'urdf/panda.urdf')
-    robot_description = {'robot_description': robot_description_config}
+    robot_description_config = load_file("simple_arm", 
+        os.path.join(
+            "urdf",
+            "panda.urdf",
+        )
+    )
+    robot_description = {"robot_description": robot_description_config}
 
-    robot_description_semantic_config = load_file('moveit_resources_panda_moveit_config', 'config/panda.srdf')
-    robot_description_semantic = {'robot_description_semantic': robot_description_semantic_config}
+    robot_description_semantic_config = load_file(
+        "simple_arm", "config/panda.srdf"
+    )
+    robot_description_semantic = {
+        "robot_description_semantic": robot_description_semantic_config
+    }
 
-    kinematics_yaml = load_yaml('moveit_resources_panda_moveit_config', 'config/kinematics.yaml')
-
+    kinematics_yaml = load_yaml(
+        "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
+    )
     
     gazebo_spawner = Node(name='ign_cli_models',
                             package='sim_spawner',
@@ -50,7 +60,6 @@ def generate_launch_description():
                             parameters=[robot_description,
                                         robot_description_semantic,
                                         kinematics_yaml,
-                                        {"use_spawn_obj": True},
-                                        {"gazebo": True}])
+                                        ])
 
     return LaunchDescription([gazebo_spawner, moveit_collision])
