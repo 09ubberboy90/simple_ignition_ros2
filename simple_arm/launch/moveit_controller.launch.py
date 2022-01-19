@@ -65,9 +65,9 @@ def generate_launch_description():
                              #   prefix=['gdbserver localhost:3000']
                              )
 
-    return LaunchDescription([moveit_controller,
-                              RegisterEventHandler(
-                                  event_handler=OnProcessExit(
-                                      target_action=moveit_controller,
-                                      on_exit=[Shutdown(reason="Completed")]))
-                              ])
+    return LaunchDescription([moveit_controller,])
+                            #   RegisterEventHandler(
+                            #       event_handler=OnProcessExit(
+                            #           target_action=moveit_controller,
+                            #           on_exit=[Shutdown(reason="Completed")]))
+                            #   ])

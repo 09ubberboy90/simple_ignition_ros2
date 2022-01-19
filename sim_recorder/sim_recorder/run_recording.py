@@ -53,7 +53,7 @@ class Ignition():
         self.commands = [
             "ros2 launch simple_arm stack_cubes.launch.py",
         ]
-        self.delays = [25] #added the timer delay from launch file + 10 s for robot movement
+        self.delays = [50] #added the timer delay from launch file + 10 s for robot movement
 
 
 

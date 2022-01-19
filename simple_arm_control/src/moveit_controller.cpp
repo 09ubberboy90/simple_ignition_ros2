@@ -87,6 +87,7 @@ int main(int argc, char **argv)
     int acc = 0;
     int iter = 2;
     std::set<std::string> processed{banned};
+    processed.emplace("table");
     geometry_msgs::msg::Pose tmp; // extended pose 
     tmp.position.x = 0.139490;
     tmp.position.y = 0.000014;
