@@ -3,7 +3,7 @@ import yaml
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-
+import xacro
 
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
@@ -30,13 +30,14 @@ def load_yaml(package_name, file_path):
 def generate_launch_description():
 
     # planning_context
-    robot_description_config = load_file("simple_arm", 
+    robot_description_config = xacro.process_file(
         os.path.join(
+            get_package_share_directory("simple_arm"),
             "urdf",
-            "panda.urdf",
+            "panda.urdf.xacro",
         )
     )
-    robot_description = {"robot_description": robot_description_config}
+    robot_description = {"robot_description": robot_description_config.toxml()}
 
     robot_description_semantic_config = load_file(
         "simple_arm", "config/panda.srdf"

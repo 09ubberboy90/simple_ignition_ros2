@@ -102,14 +102,12 @@ class SpawnerNode(Node):
             return response
 
         try:
-            out[0].split('|')
+            obj_pos = [float(x) for x in out[0][0].split(" ")]  
+            obj_rot = [float(x) for x in out[0][1].split(" ")]  
         except IndexError:
-            self.get_logger().info(str(model_string))
             response.success = False
             return response
 
-        obj_pos = [float(x) for x in out[0].split("|")]  
-        obj_rot = [float(x) for x in out[1].split("|")]  
         success = True
         state = EntityState()
         state.name = request.name

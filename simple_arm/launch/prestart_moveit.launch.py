@@ -28,6 +28,7 @@ def load_yaml(package_name, file_path):
 
 
 def generate_launch_description():
+
     # planning_context
     robot_description_config = xacro.process_file(
         os.path.join(
@@ -48,19 +49,17 @@ def generate_launch_description():
     kinematics_yaml = load_yaml(
         "moveit_resources_panda_moveit_config", "config/kinematics.yaml"
     )
+
+    # MoveGroupInterface demo executable
+    run_move_group_demo = Node(name='prestart_moveit',
+                               package='simple_arm_control',
+                               executable='prestart_moveit',
+                               output='screen',
+                               parameters=[robot_description,
+                                           robot_description_semantic,
+                                           kinematics_yaml,
+                                           ],
+                            #   prefix=['gdbserver localhost:3000']
+                            )
     
-    gazebo_spawner = Node(name='spawner',
-                            package='sim_spawner',
-                            executable='spawner',
-                            output='both')
-
-    moveit_collision = Node(name='moveit_collision',
-                            package='simple_arm_control',
-                            executable='moveit_collision',
-                            output='both',
-                            parameters=[robot_description,
-                                        robot_description_semantic,
-                                        kinematics_yaml,
-                                        ])
-
-    return LaunchDescription([gazebo_spawner, moveit_collision])
+    return LaunchDescription([run_move_group_demo])

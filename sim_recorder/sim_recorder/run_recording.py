@@ -51,12 +51,9 @@ class Ignition():
         self.name = "ignition"
         self.timeout = 360 # 6 minute
         self.commands = [
-            "ros2 launch simple_arm panda.launch.py",
-            "ros2 launch simple_arm run_move_group.launch.py",
-            "ros2 launch simple_arm moveit_controller.launch.py",
-            "ros2 launch simple_arm collision.launch.py",
+            "ros2 launch simple_arm stack_cubes.launch.py",
         ]
-        self.delays = [5, 10, 30] # it doesn't matter the timing for the rest it doesn't launch anyway
+        self.delays = [25] #added the timer delay from launch file + 10 s for robot movement
 
 
 
@@ -113,7 +110,6 @@ def start_proces(delay, procs, q):
     for _ in range(len(procs) - len(delay)):
         delay.append(0)
     for idx, p in enumerate(procs):
-        print(p.name)
         p.start()
         time.sleep(delay[idx])
 
