@@ -105,7 +105,8 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
-            {"debug_mode":False}
+            {"debug_mode":False},
+            {"log_level":"warn"}
         ],
     )
 

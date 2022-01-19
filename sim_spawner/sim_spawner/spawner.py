@@ -96,7 +96,7 @@ class SpawnerNode(Node):
     def get_entity_state(self, request: GetEntityState.Request, response: GetEntityState.Response):
         model_string = s.run(f"ign model -m {request.name} -p", capture_output=True, shell=True, check=True) 
         out = self.entity_pattern.findall(model_string.stdout.decode())
-        if type(out) == s.CalledProcessError:
+        if type(out) == s.CalledProcessError or len(model_string.stdout.decode()) == 0:
             #Handle errors
             response.success = False
             return response
@@ -105,6 +105,7 @@ class SpawnerNode(Node):
             obj_pos = [float(x) for x in out[0][0].split(" ")]  
             obj_rot = [float(x) for x in out[0][1].split(" ")]  
         except IndexError:
+            self.get_logger().info(f"Failed to get data {model_string.stdout.decode()} for {request.name}")
             response.success = False
             return response
 
