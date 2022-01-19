@@ -105,7 +105,6 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
-            sim_time,
             {"debug_mode":False}
         ],
     )
@@ -125,7 +124,6 @@ def generate_launch_description():
             robot_description_semantic,
             ompl_planning_pipeline_config,
             kinematics_yaml,
-            sim_time
         ],
     )
 
@@ -144,7 +142,7 @@ def generate_launch_description():
         executable="robot_state_publisher",
         name="robot_state_publisher",
         output="both",
-        parameters=[robot_description, sim_time],
+        parameters=[robot_description],
     )    
     # ros2_control using FakeSystem as hardware
     ros2_controllers_path = os.path.join(

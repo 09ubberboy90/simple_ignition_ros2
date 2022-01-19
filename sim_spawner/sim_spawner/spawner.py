@@ -37,7 +37,7 @@ class SpawnerNode(Node):
         super().__init__("SpawnerNode")
 
         self.model_list_pattern = re.compile(r"\-(.*)")
-        self.entity_pattern = re.compile(r"      \[(.*?)\]")
+        self.entity_pattern = re.compile(r"\[(.*?)\]\n.*\[(.*?)\]")
 
         table_path = "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Cafe table"
         cube_path = "https://fuel.ignitionrobotics.org/1.0/09ubberboy90/models/Box 5cm"

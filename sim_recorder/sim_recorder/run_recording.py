@@ -46,17 +46,17 @@ except ModuleNotFoundError:
 import _thread
 import threading
 import re
-class PyBullet():
+class Ignition():
     def __init__(self):
-        self.name = "pybullet"
-        self.timeout = 300 # 5 minute
+        self.name = "ignition"
+        self.timeout = 360 # 6 minute
         self.commands = [
-            "ros2 run pybullet_panda panda",
-            "ros2 launch pybullet_panda collision.launch.py",
-            "ros2 launch pybullet_panda run_move_group.launch.py",
-            "ros2 launch pybullet_panda moveit_controller.launch.py",
+            "ros2 launch simple_arm panda.launch.py",
+            "ros2 launch simple_arm run_move_group.launch.py",
+            "ros2 launch simple_arm moveit_controller.launch.py",
+            "ros2 launch simple_arm collision.launch.py",
         ]
-        self.delays = [5, 5, 7] # it doesn't matter the timing for the rest it doesn't launch anyway
+        self.delays = [5, 10, 30] # it doesn't matter the timing for the rest it doesn't launch anyway
 
 
 
@@ -169,13 +169,14 @@ def main(args=None):
     succ = 0
     fail = 0
 
-    sim = PyBullet()
+    sim = Ignition()
 
     if len(sys.argv) == 2:
         iteration = int(sys.argv[1])
     else:
         iteration = 1
-    dir_path = os.path.dirname(os.path.realpath(__file__))
+    # TODO: replace once symlink is fixed. OR find a better way
+    dir_path = "/workspaces/Ignition_copy/ubb/ignitiondev/src/sim_recorder/sim_recorder"
     path = os.path.join(dir_path, "..", "data")
     try:
         os.mkdir(path+f"/{sim.name}")

@@ -20,8 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            "ign_cli_models = sim_spawner.ign_cli_models:main",
-            "gazebo_throw_spawner = sim_spawner.gazebo_throw_spawner:main",
+            "spawner = sim_spawner.spawner:main",
 
         ],
     },

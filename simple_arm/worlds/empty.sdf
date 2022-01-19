@@ -39,9 +39,11 @@
                     <anchor line='left' target='window' target_line='left' />
                     <anchor line='bottom' target='window' target_line='bottom' />
                 </ignition-gui>
-                <play_pause>1</play_pause>
-                <step>1</step>
-                <start_paused>0</start_paused>
+                <play_pause>true</play_pause>
+                <start_paused>true</start_paused>
+                <service>/world/world_demo/control</service>
+                <stats_topic>/world/world_demo/stats</stats_topic>
+
             </plugin>
             <plugin filename="WorldStats" name="World stats">
                 <ignition-gui>
@@ -63,7 +65,6 @@
                 <real_time>true</real_time>
                 <real_time_factor>true</real_time_factor>
                 <iterations>false</iterations>
-                <topic>/world/panda_place/stats</topic>
             </plugin>
             <plugin filename="EntityTree" name="Entity tree">
             </plugin>

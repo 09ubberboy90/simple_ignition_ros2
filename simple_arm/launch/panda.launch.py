@@ -77,7 +77,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'ign_args',
             default_value=[os.path.join(
-                pkg_share, 'worlds', 'empty.sdf'),],
+                pkg_share, 'worlds', 'empty.sdf')," -r"],
             description='Ignition Gazebo arguments'),
         ignition,
         spawn,
