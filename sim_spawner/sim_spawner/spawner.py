@@ -3,6 +3,8 @@ import re
 import rclpy
 import os
 import sys
+import time
+import functools
 
 from ament_index_python.packages import get_package_share_directory
 from geometry_msgs.msg import Pose, Point, Quaternion
@@ -41,22 +43,44 @@ class SpawnerNode(Node):
 
         table_path = "https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Cafe table"
         cube_path = "https://fuel.ignitionrobotics.org/1.0/09ubberboy90/models/Box 5cm"
-
+        self.objs = []
+        self.poses = {}
+        self.listeners = {}
+        
         self.entity = self.create_service(
             GetEntityState, 'get_entity_state', self.get_entity_state)
         self.model = self.create_service(
             GetModelList, 'get_model_list', self.get_model_list)
-        self.objs = {}
         self.spawn_obj(table_path, "table", offset=[0.6, 0, -0.5])
         # for i in range(-5,6):
         #     for j in range(-5,6):
         #         print(f"Spawned at {i*0.5} {j*0.5}")
         #         self.spawn_obj("worlds/Cube.wbo", position = [i, 0, j])
+        counter = 0
         for x in range(2, 5):
             for y in range(-3, 4):
-                self.spawn_obj(cube_path, "cube", [x/10, y/10, 0.4])
+                self.spawn_obj(cube_path, f"cube_{counter}", [x/10, y/10, 0.4])
+                counter += 1
 
+        self.create_param_bridge()
+        self.create_listeners()
 
+    def create_listeners(self):
+        for obj in self.objs:
+            self.listeners[obj] = self.create_subscription(
+                Pose,
+                f'/model/{obj}/pose',
+                functools.partial(self.listener_callback, name=obj),
+                10)
+
+    def listener_callback(self, msg:Pose, name:str):
+        self.poses[name] = msg
+
+    def create_param_bridge(self):
+        params = [f"/model/{obj}/pose@geometry_msgs/msg/Pose@ignition.msgs.Pose" for obj in self.objs]
+        command = f"ros2 run ros_ign_bridge parameter_bridge {' '.join(params)}"
+        self.get_logger().info(command)
+        self.command = s.Popen(command, shell=True, env=os.environ)
 
     def spawn_obj(self, path,name, position=[0, 0, 0], offset=[0, 0, 0], rotation = [0,0,0]):
         out = []
@@ -73,79 +97,50 @@ class SpawnerNode(Node):
 '<include>'\
 '<pose> {out[0]} {out[1]} {out[2]} {rotation[0]} {rotation[1]} {rotation[2]}</pose>'\
 '<uri>{path}</uri>'\
+'<plugin filename=\\"ignition-gazebo-pose-publisher-system\\" name=\\"ignition::gazebo::systems::PosePublisher\\">'\
+'<publish_nested_model_pose>true</publish_nested_model_pose>'\
+'<publish_link_pose>false</publish_link_pose>'\
+'<publish_collision_pose>false</publish_collision_pose>'\
+'<publish_visual_pose>false</publish_visual_pose>'\
+'<update_frequency>1</update_frequency>'\
+'</plugin>'\
 '</include>'\
 '</sdf>" '\
 'name: "{name}" '\
-'allow_renaming: true'"""
-        model_string = s.run(spawn_cmd, capture_output=True, shell=True, check=True)
+'allow_renaming: false'"""
+        model_string = s.run(spawn_cmd, capture_output=True, shell=True)
+        self.objs.append(name)
     
     def get_model_list(self, request: GetModelList.Request, response: GetModelList.Response):
-        model_string = s.run("ign model --list", capture_output=True, shell=True, check=True)
-        out = self.model_list_pattern.findall(model_string.stdout.decode())
-        if type(out) == s.CalledProcessError:
-            #Handle errors
-            response.success = False
-            return response
-
-        model_list = [s.strip() for s in out]
-        self.get_logger().info(f"Got {len(model_list)} models")
-        response.model_names = model_list
+        response.model_names = self.objs
         response.success = True
         return response
 
     def get_entity_state(self, request: GetEntityState.Request, response: GetEntityState.Response):
-        model_string = s.run(f"ign model -m {request.name} -p", capture_output=True, shell=True, check=True) 
-        out = self.entity_pattern.findall(model_string.stdout.decode())
-        if type(out) == s.CalledProcessError or len(model_string.stdout.decode()) == 0:
-            #Handle errors
-            response.success = False
-            return response
+        pose = self.poses.get(request.name)
+        if pose is not None:
+            success = True
+        else:
+            success = False
+            pose = Pose()
 
-        try:
-            obj_pos = [float(x) for x in out[0][0].split(" ")]  
-            obj_rot = [float(x) for x in out[0][1].split(" ")]  
-        except IndexError:
-            self.get_logger().info(f"Failed to get data {model_string.stdout.decode()} for {request.name}")
-            response.success = False
-            return response
-
-        success = True
         state = EntityState()
         state.name = request.name
-        pose = Pose()
-        try:    
-            pose.position = self.get_postion(obj_pos)
-            pose.orientation = self.get_rotation(obj_rot)
-        except: # object got deleted
-            success = False
-        finally:    
-            state.pose = pose
-            response.state = state
-            response.success = success
+        state.pose = pose
+        response.state = state
+        response.success = success
         return response
 
-    def get_postion(self, obj_pose):
-        position = Point()
-        position.x = obj_pose[0]
-        position.y = obj_pose[1]
-        position.z = obj_pose[2]
-        return position
-
-    def get_rotation(self, obj_rot):
-        rotation = Quaternion()
-        quat = get_quaternion_from_euler(*  obj_rot)
-        rotation.x = float(quat[0])
-        rotation.y = float(quat[1])
-        rotation.z = float(quat[2])
-        rotation.w = float(quat[3])
-        return rotation
 
 def main(args=None):
     rclpy.init(args=args)
 
-    spawner = SpawnerNode(args=args)
 
-    rclpy.spin(spawner)
+    spawner = SpawnerNode(args=args)
+    executor = rclpy.executors.MultiThreadedExecutor()
+
+    rclpy.spin(spawner, executor=executor)
+    spawner.command.terminate()
 
     rclpy.shutdown()
 
