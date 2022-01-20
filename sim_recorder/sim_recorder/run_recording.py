@@ -53,7 +53,7 @@ class Ignition():
         self.commands = [
             "ros2 launch simple_arm stack_cubes.launch.py",
         ]
-        self.delays = [50] #added the timer delay from launch file + 10 s for robot movement
+        self.delays = [] #added the timer delay from launch file + 10 s for robot movement
 
 
 
@@ -98,10 +98,10 @@ def run_recorder(q, interrupt_event, simulator, idx, path):
 
 def generate_procs(simulator, commands, r, w, q, interrupt_event, idx, path):
     procs = []
-    for com in commands:
-        procs.append(Process(target=run_com, args=(w, q, com), name=com))
     procs.append(Process(target=run_recorder, args=(
         q, interrupt_event, simulator, idx, path), daemon=True, name="Recorder"))
+    for com in commands:
+        procs.append(Process(target=run_com, args=(w, q, com), name=com))
     return procs
 
 
@@ -136,21 +136,25 @@ def run(sim, idx, path):
     pids = start_proces(sim.delays, procs, q)
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(sim.timeout)
+
+    start_time = time.time()
     with open(path+f"/{sim.name}/log/{idx}.txt", "w") as f,\
             open(path+f"/{sim.name}/run.txt", "a") as out:
         try:
             while True:
                 text = reader.readline()
                 f.write(text)
+                if "Starting timer" in text:
+                    start_exec_time = time.time() - start_time
                 if "Task executed successfully" in text:
                     timing = [int(s) for s in re.findall(r'\b\d+\b', text)][-1]
-                    log(out, f"Completed for {idx} in {timing} ms")
+                    log(out, f"Completed for {idx} in {timing} ms. Task started {start_exec_time*1000:.0f} ms after start")
                     signal.alarm(0)
                     kill_proc_tree(pids, procs, interrupt_event)
                     return 1, 0
                 if "Task failed" in text: 
                     numbers = [int(s) for s in re.findall(r'\b\d+\b', text)]
-                    log(out, f"Failed for {idx} in {numbers[-1]} ms with {numbers[-2]} cube stacked")
+                    log(out, f"Failed for {idx} in {numbers[-1]} ms with {numbers[-2]} cube stacked. Task started {start_exec_time*1000:.0f} ms after start")
                     signal.alarm(0)
                     kill_proc_tree(pids, procs, interrupt_event)
                     return 0, 1
