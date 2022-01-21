@@ -39,13 +39,6 @@ ament_target_dependencies(moveit_controller
   geometry_msgs
 )
 
-add_executable(prestart_moveit src/prestart_moveit.cpp src/simple_moveit.cpp)
-ament_target_dependencies(prestart_moveit
-  rclcpp
-  moveit_ros_planning_interface
-  simple_interface
-  geometry_msgs
-)
 # add_executable(throw_moveit src/throw_moveit.cpp include/moveit.hpp)
 # ament_target_dependencies(throw_moveit
 #   rclcpp
@@ -72,7 +65,7 @@ if(BUILD_TESTING)
 endif()
 
 ## Install
-install(TARGETS moveit_controller  moveit_collision prestart_moveit
+install(TARGETS moveit_controller  moveit_collision
   DESTINATION lib/${PROJECT_NAME}
 )
 
