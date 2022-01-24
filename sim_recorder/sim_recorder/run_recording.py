@@ -53,7 +53,7 @@ class Ignition():
         self.commands = [
             "ros2 launch simple_arm stack_cubes.launch.py",
         ]
-        self.delays = [] #added the timer delay from launch file + 10 s for robot movement
+        self.delays = [5] #added the timer delay from launch file + 10 s for robot movement
 
 
 
@@ -68,10 +68,10 @@ def kill_proc_tree(pids, procs, interrupt_event, including_parent=False):
                 parent.kill()
         except:
             pass
-    time.sleep(5)  # Wait for everything ot close to prevent broken_pipe
+    time.sleep(2)  # Wait for everything ot close to prevent broken_pipe
     for proc in procs[:-1]:
         proc.kill()
-    time.sleep(5)  # Wait for everything ot close to prevent broken_pipe
+    time.sleep(2)  # Wait for everything ot close to prevent broken_pipe
 
 
 # Reference : https://stackoverflow.com/a/40281422
@@ -133,11 +133,11 @@ def run(sim, idx, path):
     procs = generate_procs(sim.name, sim.commands, r,
                            w, q, interrupt_event, idx, path)
     time.sleep(1)
+    start_time = time.time()
     pids = start_proces(sim.delays, procs, q)
     signal.signal(signal.SIGALRM, handler)
     signal.alarm(sim.timeout)
 
-    start_time = time.time()
     with open(path+f"/{sim.name}/log/{idx}.txt", "w") as f,\
             open(path+f"/{sim.name}/run.txt", "a") as out:
         try:
