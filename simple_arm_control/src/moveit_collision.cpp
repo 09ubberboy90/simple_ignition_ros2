@@ -168,7 +168,7 @@ int main(int argc, char **argv)
             collision_objects.push_back(obj);
         }
         planning_scene_interface.applyCollisionObjects(collision_objects);
-        std::this_thread::sleep_for(std::chrono::milliseconds(250)); // otherwise too many calls 
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 
     rclcpp::shutdown();

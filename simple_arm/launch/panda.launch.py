@@ -11,6 +11,7 @@ from launch_ros.actions import Node
 import xacro
 from launch.actions import ExecuteProcess
 
+
 def load_file(package_name, file_path):
     package_path = get_package_share_directory(package_name)
     absolute_file_path = os.path.join(package_path, file_path)
@@ -38,9 +39,9 @@ def generate_launch_description():
                      '-x', '0',
                      '-z', '0',
                      '-Y', '0',
-                    #   '-topic', "robot_description"],
-                    #  '-file', '/workspaces/Ignition/ubb/.gazebo/models/panda_ignition/model.sdf'],
-                     '-file', os.path.join(pkg_share, "urdf", "panda_ign.sdf",)], # using well defined sdf as converting urdf causes problems with the physics engine
+                     #   '-topic', "robot_description"],
+                     #  '-file', '/workspaces/Ignition/ubb/.gazebo/models/panda_ignition/model.sdf'],
+                     '-file', os.path.join(pkg_share, "urdf", "panda_ign.sdf",)],  # using well defined sdf as converting urdf causes problems with the physics engine
                  output='screen')
 
     robot_description_config = xacro.process_file(
@@ -50,6 +51,12 @@ def generate_launch_description():
             "panda.urdf.xacro",
         )
     )
+
+    bridge = Node(package='ros_ign_bridge', 
+                executable='parameter_bridge', 
+                arguments=['/clock@rosgraph_msgs/msg/Clock@ignition.msgs.Clock'], 
+                output='screen')
+
     robot_description = {"robot_description": robot_description_config.toxml()}
     robot_state_publisher = Node(
         package="robot_state_publisher",
@@ -57,8 +64,7 @@ def generate_launch_description():
         name="robot_state_publisher",
         output="both",
         parameters=[robot_description],
-    )    
-
+    )
 
     load_controllers = []
     for controller in [
@@ -68,7 +74,8 @@ def generate_launch_description():
     ]:
         load_controllers += [
             ExecuteProcess(
-                cmd=["ros2 control load_controller --set-state start {}".format(controller)],
+                cmd=[
+                    "ros2 control load_controller --set-state start {}".format(controller)],
                 shell=True,
                 output="screen",
             )
@@ -77,10 +84,11 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'ign_args',
             default_value=[os.path.join(
-                pkg_share, 'worlds', 'empty.sdf')," -r"],
+                pkg_share, 'worlds', 'empty.sdf'), " -r"],
             description='Ignition Gazebo arguments'),
         ignition,
         spawn,
         robot_state_publisher,
+        bridge
     ] + load_controllers
     )
