@@ -54,7 +54,8 @@ def generate_launch_description():
 
     bridge = Node(package='ros_ign_bridge', 
                 executable='parameter_bridge', 
-                arguments=['/clock@rosgraph_msgs/msg/Clock@ignition.msgs.Clock'], 
+                arguments=['/world/panda_place/clock@rosgraph_msgs/msg/Clock@ignition.msgs.Clock'], 
+                remappings=[("world/panda_place/clock", "clock")],
                 output='screen')
 
     robot_description = {"robot_description": robot_description_config.toxml()}

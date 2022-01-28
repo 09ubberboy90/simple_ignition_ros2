@@ -46,7 +46,7 @@ class ProcMonitor(Node):
     def __init__(self, allowed, idx, sim_name, path):
         super().__init__('proccess_monitor')
 
-        self.proc_nb = len(allowed)*2
+        self.proc_nb = len(allowed)*4
 
         self.cpu = np.full((self.proc_nb, 100), np.nan, dtype=np.float)
         self.ram = np.full((self.proc_nb, 100), np.nan, dtype=np.float)#
@@ -104,7 +104,8 @@ class ProcMonitor(Node):
 
 
     def dump_values(self):
-        print("dump_values")
+        print(f"dump_values {self.cpu.shape}")
+        print(f"dump_values {self.ram.shape}")
         self.name = {}
         for pid, (name, _) in self.pids.items():
             new_p = name
@@ -137,9 +138,9 @@ def run(path, simulator="isaac", idx=0):
     if simulator == "ignition":
         allowed.extend(["ruby"])
     if simulator == "vrep":
-        allowed.extend(["vrep"])
+        allowed.extend(["coppeliaSim", "vrep_control"])
     if simulator == "pybullet":
-        allowed.extend(["vrep"])
+        allowed.extend(["panda"])
     monitor = ProcMonitor(allowed, idx, simulator, path)
     signal.signal(signal.SIGINT, lambda sig, frame: monitor.dump_values())
     signal.signal(signal.SIGTERM, lambda sig, frame: monitor.dump_values())

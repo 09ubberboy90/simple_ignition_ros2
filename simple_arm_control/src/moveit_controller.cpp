@@ -134,6 +134,12 @@ int main(int argc, char **argv)
     processed.emplace("table");
 
     std::map<std::string, geometry_msgs::msg::Pose> chosen_objs;
+    geometry_msgs::msg::Pose tmp; // extended pose 
+    tmp.position.x = 0.139490;
+    tmp.position.y = 0.000014;
+    tmp.position.z = 1.118214;
+    simple_moveit->goto_pose(tmp);
+    RCLCPP_INFO(rclcpp::get_logger("PrestartMoveit"), "Completed move");
 
     auto discard = choose_target(simple_moveit->get_planning_scene_interface(), &processed);
 
