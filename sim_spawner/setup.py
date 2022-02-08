@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             "spawner = sim_spawner.spawner:main",
-
+            "throw_spawner = sim_spawner.throw_spawner:main",
         ],
     },
 )
