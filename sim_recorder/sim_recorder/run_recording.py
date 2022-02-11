@@ -51,7 +51,7 @@ import re
 class Ignition():
     def __init__(self):
         self.name = "ignition"
-        self.timeout = 600 # 6 minute
+        self.timeout = 900 # 6 minute
         self.commands = [
             "ros2 launch simple_arm stack_cubes.launch.py",
         ]
@@ -184,16 +184,32 @@ def main(args=None):
         iteration = 1
     # TODO: replace once symlink is fixed. OR find a better way
     dir_path = "/workspaces/Ignition_copy/ubb/ignitiondev/src/sim_recorder/sim_recorder"
+    path = os.path.join(dir_path, "..")
+    try:
+        os.mkdir(path+"/data")
+    except:
+        pass
     path = os.path.join(dir_path, "..", "data")
     try:
         os.mkdir(path+f"/{sim.name}")
-        os.mkdir(path+f"/{sim.name}/log")
-        os.mkdir(path+f"/{sim.name}/ram")
-        os.mkdir(path+f"/{sim.name}/cpu")
-        os.mkdir(path+f"/{sim.name}/clock")
     except Exception as e:
-        print(e)
-        print("Folder exist. Overwriting...")
+        pass
+    try:
+        os.mkdir(path+f"/{sim.name}/log")
+    except Exception as e:
+        pass
+    try:
+        os.mkdir(path+f"/{sim.name}/ram")
+    except Exception as e:
+        pass
+    try:
+        os.mkdir(path+f"/{sim.name}/cpu")
+    except Exception as e:
+        pass
+    try:
+        os.mkdir(path+f"/{sim.name}/clock")
+    except:
+        pass
     if os.path.exists(path+f"/{sim.name}/run.txt"):
         os.remove(path+f"/{sim.name}/run.txt")
 
