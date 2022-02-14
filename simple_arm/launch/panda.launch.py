@@ -4,12 +4,12 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
-from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 import xacro
 from launch.actions import ExecuteProcess
+from launch.conditions import IfCondition
 
 
 def load_file(package_name, file_path):
@@ -81,11 +81,16 @@ def generate_launch_description():
                 output="screen",
             )
         ]
+    gui = LaunchConfiguration("gui")
     return LaunchDescription([
+        DeclareLaunchArgument(
+        'gui',
+        default_value="true",
+        description='GUI'),
         DeclareLaunchArgument(
             'ign_args',
             default_value=[os.path.join(
-                pkg_share, 'worlds', 'empty.sdf'), " -r"],
+                pkg_share, 'worlds', 'empty.sdf'), " -r" + (" -s" if IfCondition(gui) else "")],
             description='Ignition Gazebo arguments'),
         ignition,
         spawn,
