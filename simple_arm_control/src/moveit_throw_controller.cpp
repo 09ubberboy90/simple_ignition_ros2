@@ -127,6 +127,7 @@ int main(int argc, char **argv)
 
 
     success = simple_moveit->pick(obj_name, pose);
+    poses = simple_moveit->get_planning_scene_interface()->getObjects();
 
     if (!success)
     {
@@ -152,8 +153,15 @@ int main(int argc, char **argv)
 
     for (const auto& imap : collision_objects)
     {
+        if (poses.find(imap.first) == poses.end())
+        {
+            RCLCPP_INFO(rclcpp::get_logger("panda_moveit_controller"), "Could not find %s", imap.first.c_str());
+            continue;
+        }
+        
         if (!check_object_pose(&collision_objects[imap.first].primitive_poses[0], &poses[imap.first].primitive_poses[0]))
         {
+            RCLCPP_INFO(rclcpp::get_logger("panda_moveit_controller"), "Cube %s has moved", imap.first.c_str());
             moved += 1;
         }
     }
