@@ -51,7 +51,7 @@ import threading
 import re
 class Ignition():
     def __init__(self, gui=False):
-        self.name = "ignition"
+        self.name = "ignition" + ("_gui" if gui else "")
         self.timeout = 900 # 6 minute
         self.commands = [
             f"ros2 launch simple_arm stack_cubes.launch.py gui:={str(gui).lower()}"

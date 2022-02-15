@@ -54,12 +54,12 @@ class SpawnerNode(Node):
         
         self.spawn_obj(cube_path, "target", position=[0.5,0.0,0.025]) # target must be second to spawn
 
-        self.spawn_obj(cube_path, "cube_1", position=[1.5,0.065,0.025])
-        self.spawn_obj(cube_path, "cube_2", position=[1.5,0.0,0.025])
-        self.spawn_obj(cube_path, "cube_3", position=[1.5,-0.065,0.025])
-        self.spawn_obj(cube_path, "cube_4", position=[1.5,-0.0335,0.075])
-        self.spawn_obj(cube_path, "cube_5", position=[1.5,0.0335,0.075])
-        self.spawn_obj(cube_path, "cube_6", position=[1.5,0.0,0.135])
+        self.spawn_obj(cube_path, "cube_1", position=[1.4,0.065,0.025])
+        self.spawn_obj(cube_path, "cube_2", position=[1.4,0.0,0.025])
+        self.spawn_obj(cube_path, "cube_3", position=[1.4,-0.065,0.025])
+        self.spawn_obj(cube_path, "cube_4", position=[1.4,-0.0335,0.075])
+        self.spawn_obj(cube_path, "cube_5", position=[1.4,0.0335,0.075])
+        self.spawn_obj(cube_path, "cube_6", position=[1.4,0.0,0.135])
 
         self.create_param_bridge()
         self.create_listeners()

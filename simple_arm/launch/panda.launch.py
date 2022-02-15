@@ -90,7 +90,7 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'ign_args',
             default_value=[os.path.join(
-                pkg_share, 'worlds', 'empty.sdf'), " -r" + (" -s" if IfCondition(gui) else "")],
+                pkg_share, 'worlds', 'empty.sdf'), " -r" + (" -s" if not IfCondition(gui) else "")],
             description='Ignition Gazebo arguments'),
         ignition,
         spawn,
