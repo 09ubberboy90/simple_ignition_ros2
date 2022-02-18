@@ -159,7 +159,7 @@ int main(int argc, char **argv)
             continue;
         }
         
-        if (!check_object_pose(&collision_objects[imap.first].primitive_poses[0], &poses[imap.first].primitive_poses[0]))
+        if (!check_object_pose(&collision_objects[imap.first].primitive_poses[0], &poses[imap.first].primitive_poses[0]) && imap.first.compare("target") != 0)
         {
             RCLCPP_INFO(rclcpp::get_logger("panda_moveit_controller"), "Cube %s has moved", imap.first.c_str());
             moved += 1;
@@ -168,10 +168,6 @@ int main(int argc, char **argv)
     auto new_pose = simple_moveit->get_planning_scene_interface()->getObjects({obj_name})[obj_name].primitive_poses[0];
 
     auto target_moved = check_object_pose(&new_pose, &pose);
-    if (target_moved)
-    {
-        moved-= 1;
-    }
     
     RCLCPP_INFO(rclcpp::get_logger("panda_moveit_controller"), 
     "%d cubes moved out of 6. Original cube %s. %d moveit failure",moved, target_moved ? "is still in place" : "moved", failure);

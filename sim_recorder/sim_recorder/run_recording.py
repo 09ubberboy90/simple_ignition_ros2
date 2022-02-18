@@ -50,9 +50,9 @@ import _thread
 import threading
 import re
 class Ignition():
-    def __init__(self, gui=False):
-        self.name = "ignition" + ("_gui" if gui else "")
-        self.timeout = 900 # 6 minute
+    def __init__(self, gui=False, throw=False):
+        self.name = "ignition" +("_throw" if throw else "") + ("_gui" if gui else "")
+        self.timeout = 900 if not throw else 600 # 6 minute
         self.commands = [
             f"ros2 launch simple_arm stack_cubes.launch.py gui:={str(gui).lower()}"
         ]
@@ -182,40 +182,42 @@ def main(args=None):
                         help='Allow to start the simulation at a different index then 1')
     parser.add_argument('--headless', action='store_true',
                         help='Whetever to render to a GUI or not')
+    parser.add_argument('-t', '--throw', action='store_true',
+                        help='If enabled run the throw simulation')
 
     args = parser.parse_args()
     gui = True if not args.headless else False
-    sim = Ignition(gui)
+    sim = Ignition(gui, args.throw)
     print(os.path.dirname(os.path.realpath(__file__)))
     # TODO: replace once symlink is fixed. OR find a better way
     dir_path = "/workspaces/Ignition_copy/ubb/ignitiondev/src/sim_recorder/sim_recorder"
     path = os.path.join(dir_path, "..")
     try:
         os.mkdir(path+"/data")
-    except:
-        pass
+    except Exception as e:
+        print(f"Error {e}")
     path = os.path.join(dir_path, "..", "data")
     try:
         os.mkdir(path+f"/{sim.name}")
     except Exception as e:
-        pass
+        print(f"Error {e}")
     try:
         os.mkdir(path+f"/{sim.name}/log")
     except Exception as e:
-        pass
+        print(f"Error {e}")
     try:
         os.mkdir(path+f"/{sim.name}/ram")
     except Exception as e:
-        pass
+        print(f"Error {e}")
     try:
         os.mkdir(path+f"/{sim.name}/cpu")
     except Exception as e:
-        pass
+        print(f"Error {e}")
     try:
         os.mkdir(path+f"/{sim.name}/clock")
-    except:
-        pass
-    if os.path.exists(path+f"/{sim.name}/run.txt"):
+    except Exception as e:
+        print(f"Error {e}")
+    if os.path.exists(path+f"/{sim.name}/run.txt") and args.start_index == 1:
         os.remove(path+f"/{sim.name}/run.txt")
 
     for idx in range(args.start_index, args.iterations+1):
