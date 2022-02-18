@@ -5,10 +5,10 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 import xacro
-from launch.actions import ExecuteProcess
+from launch.actions import ExecuteProcess, LogInfo
 from launch.conditions import IfCondition
 
 
@@ -82,19 +82,21 @@ def generate_launch_description():
             )
         ]
     gui = LaunchConfiguration("gui")
+    ign_args = os.path.join(pkg_share, 'worlds', 'empty.sdf') + " -r"
+    tmp = PythonExpression(['"',ign_args, '" + " -s" if "', gui, '" == "false" else "', ign_args,'"'])
     return LaunchDescription([
         DeclareLaunchArgument(
-        'gui',
-        default_value="true",
-        description='GUI'),
+            'gui',
+            default_value="true",
+            description='GUI'),
         DeclareLaunchArgument(
             'ign_args',
-            default_value=[os.path.join(
-                pkg_share, 'worlds', 'empty.sdf'), " -r" + (" -s" if not IfCondition(gui) else "")],
+            default_value=tmp,
             description='Ignition Gazebo arguments'),
         ignition,
         spawn,
         robot_state_publisher,
         bridge
     ] + load_controllers
+
     )
