@@ -54,7 +54,7 @@ class Ignition():
         self.name = "ignition" +("_throw" if throw else "") + ("_gui" if gui else "")
         self.timeout = 900 if not throw else 600 # 6 minute
         self.commands = [
-            f"ros2 launch simple_arm stack_cubes.launch.py gui:={str(gui).lower()}"
+            f"ros2 launch simple_arm {'throw' if throw else 'stack'}_cubes.launch.py gui:={str(gui).lower()}"
         ]
         self.delays = [5] #added the timer delay from launch file + 10 s for robot movement
 
@@ -76,6 +76,7 @@ def kill_proc_tree(pids, procs, interrupt_event, including_parent=False):
     for proc in procs[2:]:
         proc.kill()
     subprocess.Popen("pkill ign", shell=True)
+    subprocess.Popen("pkill ruby", shell=True)
     time.sleep(2)  # Wait for everything ot close to prevent broken_pipe
 
 

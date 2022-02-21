@@ -1,0 +1,12 @@
+[submodule "ros2_control"]
+	path = ros2_control
+	url = https://github.com/ros-controls/ros2_control
+	branch = foxy
+[submodule "ign_ros2_control"]
+	path = ign_ros2_control
+	url = https://github.com/ignitionrobotics/ign_ros2_control
+	branch = foxy
+[submodule "ros2_controllers"]
+	path = ros2_controllers
+	url = https://github.com/SC-Robotics-2021/ros2_controllers
+	branch = feature/effort_trajectory_controll_foxy
